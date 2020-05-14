@@ -53,9 +53,14 @@ COLOCA A CONTINUACION LOS OBJETIVOS
 Repositorio usado en este seminario:
 
 * https://github.com/ualmtorres/SanIsidro2020[Acceso a los ejemplos]
-
 ====
 
+.Software para el seguimiento del tutorial
+****
+* https://docs.docker.com/get-docker/[Docker]
+* https://docs.docker.com/compose/install/[Docker Compose]
+* Para Kubernetes usaremos un servicio cloud.
+****
 
 ## Docker
 
