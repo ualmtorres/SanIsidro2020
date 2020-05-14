@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sgapp
+  namespace: demo
+  labels:
+    app: sgapp
+spec:
+  revisionHistoryLimit: 2
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: sgapp
+  template:
+    metadata:
+      labels:
+        app: sgapp
+    spec:
+      containers:
+        - name: sgapp
+          image: ualmtorres/sgapp:v0
+          ports:
+            - name: http
+              containerPort: 80
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi

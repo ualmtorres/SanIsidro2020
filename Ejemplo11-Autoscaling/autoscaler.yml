@@ -1,0 +1,27 @@
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: sgapi
+  namespace: demo
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1beta1
+    kind: Deployment
+    name: sgapi
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 15
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: sgapp
+  namespace: demo
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1beta1
+    kind: Deployment
+    name: sgapp
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 15

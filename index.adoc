@@ -1,0 +1,668 @@
+////
+NO CAMBIAR!!
+Codificación, idioma, tabla de contenidos, tipo de documento
+////
+:encoding: utf-8
+:lang: es
+:toc: right
+:toc-title: Tabla de contenidos
+:doctype: book
+:imagesdir: ./images
+:figure-caption: Figura
+:example-caption: Ejemplo
+:table-caption: Tabla
+:linkattrs:
+
+# Desarrollo de aplicaciones escalables usando contenedores
+Servicio de las Tecnologías de la Información y las Comunicaciones - Universidad de Almería
+
+image::logocloudstic.png[]
+
+// NO CAMBIAR!! (Entrar en modo no numerado de apartados)
+:numbered!: 
+
+[abstract]
+## Resumen
+////
+COLOCA A CONTINUACION EL RESUMEN
+////
+Notas sobre conceptos básicos del desarrollo con contenedores Docker y Kubernetes. Se incluyen también el código de bastantes ejemplos para ilustrar los conceptos descritos.
+
+////
+COLOCA A CONTINUACION LOS OBJETIVOS
+////
+[discrete]
+## Objetivos
+
+* Conocer los componentes básicos de las aplicaciones basadas en contenedores
+* Crear contenedores a partir de imágenes de Docker Hub
+* Usar volúmenes para almacenamiento persistente
+* Aprender a usar `Dockerfile` para la creación de imágenes
+* Usar _Docker Compose_ para construir entornos de contenedores
+* Aprender la técnica de desarrollo de aplicaciones multicontenedor con _Docker Compose_
+* Conocer los componentes básicos de Kubernetes (`pod`, deployment` y `service`)
+* Desplegar aplicaciones en Kubernetes
+* Crear `init containers`
+* Crear una aplicación autoescalable
+
+// Entrar en modo numerado de apartados
+:numbered:
+
+[TIP]
+====
+Repositorio usado en este seminario:
+
+* https://github.com/ualmtorres/SanIsidro2020[Acceso a los ejemplos]
+
+====
+
+
+## Docker
+
+* Proyecto Open Source 2013​
+* Revolución en el desarrollo y despliegue de aplicaciones​
+* Plataforma para que desarrolladores y administradores puedan desarrollar, desplegar y ejecutar aplicaciones en un entorno aislado denominado *contenedor​*
+* Docker permite separar las aplicaciones de la infraestructura acelerando el proceso de entrega de software a producción​
+
+### Docker vs Máquinas virtuales
+
+image::containers-vs-vm.png[]
+
+### Despliegue de un contenedor
+
+Al desplegar un contenedor s descarga su imagen al registro local
+
+Enlace al ejemplo​
+
+[source,bash, linenums]
+.`Ejemplo01-Contenedor/crear-contenedor-apache.sh`
+----
+include::Ejemplo01-Contenedor/crear-contenedor-apache.sh[]
+----
+
+image::crear-contenedor-apache.png[]
+
+### Despliegue de un contenedor con un volumen​
+
+* Los contenedores son efímeros​
+* El volumen es persistente​
+
+Código de la aplicación​
+
+[source,html, linenums]
+.`Ejemplo02-Contenedor-con-volumen/myweb/index.php`
+----
+include::Ejemplo02-Contenedor-con-volumen/myweb/index.html[]
+----
+
+[source,bash, linenums]
+.`Ejemplo02-Contenedor-con-volumen/crear-contenedor-apache-con-volumen.sh`
+----
+include::Ejemplo02-Contenedor-con-volumen/crear-contenedor-apache-con-volumen.sh[]
+----
+
+image::crear-contenedor-con-volumen.png[]
+
+### Imágenes Docker interesantes​
+
+* Servidores Web: Apache, Nginx, ...​
+* BD: MySQL, MongoDB, Redis, PostgreSQL, …​
+* Sistemas operativos: Alpine, Ubuntu, …​
+* Y muchas más: node, php, elasticsearch, haproxy, wordpress,  rabbitmq, python, openjdk, tomcat, jenkins, redmine,  flink, spark, …​
+
+https://hub.docker.com/explore/[Imágenes populares en Docker Hub]
+
+### Crear imagen propia
+
+El Dockerfile:
+
+* Indica cómo y con qué construir la imagen​
+* Produce repetibilidad​
+* La imagen queda en el registro local​
+
+[source,docker, linenums]
+.`Ejemplo03-Imagen/Dockerfile`
+----
+include::Ejemplo03-Imagen/Dockerfile[]
+----
+
+Crear imagen
+
+[source,bash, linenums]
+.`Ejemplo03-Imagen/crear-imagen.sh`
+----
+include::Ejemplo03-Imagen/crear-imagen.sh[]
+----
+
+El código de la aplicación
+
+[source,html, linenums]
+.`Ejemplo03-Imagen/myweb/index.html`
+----
+include::Ejemplo03-Imagen/myweb/index.html[]
+----
+
+Despliegue de imagen creada​
+
+[source,bash, linenums]
+.`Ejemplo03-Imagen/crear-contenedor-myweb.sh`
+----
+include::Ejemplo03-Imagen/crear-contenedor-myweb.sh[]
+----
+
+image::crear-imagen-propia.png[]
+
+### Subir imagen a Docker Hub
+
+* Docker Hub es un registro de imágenes público
+* La cuenta gratuita permite
+    - Imágenes (repositorios) públicos indefinidos​
+    - Una imagen privada
+
+Subida a Docker Hub​
+
+[source,bash, linenums]
+.`Ejemplo03-Imagen/subir-imagen.sh`
+----
+include::Ejemplo03-Imagen/subir-imagen.sh[]
+----
+
+Despliegue de imagen subida​
+
+[source,bash, linenums]
+.`Ejemplo03-Image/crear-contenedor-myweb-desde-dockerhub.sh`
+----
+include::Ejemplo03-Imagen/crear-contenedor-myweb-desde-dockerhub.sh[]
+----
+
+image::crear-contenedor-con-imagen-subida.png[]
+
+### Ciclo de desarrollo con Docker
+
+* Crear carpetas de desarrollo​
+* Desplegar imagen de base​
+* Crear Dockerfile​
+* Iterar​
+    - Programar + Subir a repo​
+    - Crear imagen propia​
+    - Etiquetar como nueva versión​
+    - Subir nueva imagen a Docker Hub​
+    - Poner en producción
+
+## Docker Compose
+
+* Permite definir y ejecutar aplicaciones Docker con varios contenedores​
+* Podemos tener varios entornos aislados (normalmente con nombre de directorio)​
+* Sólo vuelve a crear los contenedores que hayan cambiado
+
+### Despliegue con Docker Compose​
+
+[source,sql, linenums]
+.`Ejemplo04-Docker-Compose/init.sql`
+----
+include::Ejemplo04-Docker-Compose/init.sql[]
+----
+
+[source,php, linenums]
+.`Ejemplo04-Docker-Compose/app/index.php`
+----
+include::Ejemplo04-Docker-Compose/app/index.php[]
+----
+
+[source,yaml, linenums]
+.`Ejemplo04-Docker-Compose/docker-compose.yml`
+----
+include::Ejemplo04-Docker-Compose/docker-compose.yml[]
+----
+
+[source,yaml, linenums]
+.`Ejemplo04-Docker-Compose/lanzar-app-ejemplo.sh`
+----
+include::Ejemplo04-Docker-Compose/lanzar-app-ejemplo.sh[]
+----
+
+[source,docker, linenums]
+.`Ejemplo04-Docker-Compose/Dockerfile`
+----
+include::Ejemplo04-Docker-Compose/Dockerfile[]
+----
+
+[source,bash, linenums]
+.`Ejemplo04-Docker-Compose/limpiar-entorno.sh`
+----
+include::Ejemplo04-Docker-Compose/limpiar-entorno.sh[]
+----
+
+image::aplicacion-docker-compose.png[]
+
+### Despliegue de una aplicación que consume de una API con Docker Compose​
+
+[source,sql, linenums]
+.`Ejemplo05-Docker-Compose-API/init.sql`
+----
+include::Ejemplo05-Docker-Compose-API/init.sql[]
+----
+
+[source,php, linenums]
+.`Ejemplo05-Docker-Compose-API/api/.htaccess`
+----
+include::Ejemplo05-Docker-Compose-API/api/.htaccess[]
+----
+
+[source,php, linenums]
+.`Ejemplo05-Docker-Compose-API/api/index.php`
+----
+include::Ejemplo05-Docker-Compose-API/api/index.php[]
+----
+
+[source,php, linenums]
+.`Ejemplo05-Docker-Compose-API/app/index.php`
+----
+include::Ejemplo05-Docker-Compose-API/app/index.php[]
+----
+
+[source,yaml, linenums]
+.`Ejemplo05-Docker-Compose-API/docker-compose.yml`
+----
+include::Ejemplo05-Docker-Compose-API/docker-compose.yml[]
+----
+
+[source,yaml, linenums]
+.`Ejemplo05-Docker-Compose-API/lanzar-app-ejemplo.sh`
+----
+include::Ejemplo05-Docker-Compose-API/lanzar-app-ejemplo.sh[]
+----
+
+image::aplicacion-docker-compose.png[]
+
+[source,docker, linenums]
+.`Ejemplo05-Docker-Compose-API/api/Dockerfile`
+----
+include::Ejemplo05-Docker-Compose-API/api/Dockerfile[]
+----
+
+[source,docker, linenums]
+.`Ejemplo05-Docker-Compose-API/app/Dockerfile`
+----
+include::Ejemplo05-Docker-Compose-API/app/Dockerfile[]
+----
+
+[source,bash, linenums]
+.`Ejemplo05-Docker-Compose-API/subir-imagenes.sh`
+----
+include::Ejemplo05-Docker-Compose-API/subir-imagenes.sh[]
+----
+
+[source,bash, linenums]
+.`Ejemplo05-Docker-Compose-API/limpiar-entorno.sh`
+----
+include::Ejemplo05-Docker-Compose-API/limpiar-entorno.sh[]
+----
+
+### Ciclo de desarrollo con Docker Compose
+
+* Crear carpetas de desarrollo​
+* Crear docker-compose.yaml​
+* Lanzar docker-compose.yaml​
+* Crear Dockerfile​
+* Iterar​
+    - Programar + Subir a repo​
+    - Crear imagen propia​
+    - Etiquetar como nueva versión​
+    - Subir nueva imagen a Docker Hub​
+    - Poner en producción​
+
+## Kubernetes
+
+* Proyecto Open Source 2014​
+* Plataforma para despliegue automático, escalado y gestión de aplicaciones contenedorizadas.​
+* Permite el despliegue de aplicaciones en un cluster sin pensar en las máquinas que lo soportan​
+* Ofrece:​
+    - Replicación​
+    - (Auto)escalado​
+
+### Arquitectura de Kubernetes
+
+* El Master inicia los contenedores de la aplicación. ​
+* El máster organiza los contenedores para que se ejecuten en los nodos del cluster. ​
+* Los nodos interactúan con el master informando del estado de los pods​
+
+image::kubernetes-arquitectura.png[]
+
+### Dónde usar Kubernetes
+
+* Local (desarrollo)​
+    - Minikube​
+* Cloud​
+    - AKS (Azure Kubernetes Service)​
+    - GKE (Google Kubernetes Engine)​
+    - EKS (Amazon Elastic Kubernetes Service)​
+    - ...
+* On premise​
+    - OpenStack (IaaS) + Rancher (k8s)​
+    - ...
+
+### Ejemplo de coste diario en AKS
+
+* 4 nodos​
+* Características nodos​
+    - 2 vcpu​
+    - 7 GB RAM​
+    - 32 GB HDD​
+* Coste diario total (6.5 EUR)​
+    - 4.6 EUR MV​
+    - 1 EUR almacenamiento​
+    - 0.9 EUR Log analytics
+
+### `kubectl`
+
+CLI para Kubernetes​
+
+Bloques de `~/.kube/config`: 
+
+* Clusters (nombre, IP, certificado,  …)​
+* Contextos (nombre, cluster, usuario)​
+* Usuarios (nombre, certificados, tokens, …)​
+
+Uso: 
+
+* Despliegue: 
+
++
+[source, bash]
+----
+$ kubectl apply -f <manifiesto.yaml>​
+----
+
+* Destrucción: 
+
++
+[source, bash]
+----
+$ kubectl delete <manifiesto.yaml>​
+----
+
+* Información: 
+
++
+[source,bash]
+----
+$ kubectl get [pods | deployments | services | hpa | namespaces | …]​
+----
+
+### Obtener credenciales AKS para `kubectl`
+
+* Usar Cloud Shell​
+
++
+[source, bash]
+----
+$ az aks get-credentials \​
+--resource-group <myResourceGroup> \​
+--name <myAKSCluster>​
+----
+
+* El resultado está en `~/.kube/config` de Azure Cloud Shell​
+    - Cluster info​
+    - Context info​
+    - User info​
+
+* Pegar esos datos en `~/.kube/config` del equipo de desarrollo​
+
+### Contextos
+
+Configura `kubectl` contra un cluster Kubernetes​
+
+Comandos:
+
+[source, bash]
+----
+$ kubectl config get-contexts​
+$ kubectl config use-context mtorres-kube-cluster
+----
+
+### Objetos de Kubernetes. Pod​
+
+* Grupo de uno o más contenedores de una aplicación y algunos recursos compartidos de esos contenedores (p.e. volúmenes, redes)​
+* Contenedores auxiliares en un pod:​
+    - Proxy​
+    - Volcado de logs​
+    - Certificado SSL​
+
+image::kubernetes-pod.png[]
+
+### Despliegue de un pod
+
+[source,yaml, linenums]
+.`Ejemplo06-Pod/namespace-demo.yml`
+----
+include::Ejemplo06-Pod/namespace-demo.yml[]
+----
+
+[source,yaml, linenums]
+.`Ejemplo06-Pod/pod-myweb.yml`
+----
+include::Ejemplo06-Pod/pod-myweb.yml[]
+----
+
+[source,sh, linenums]
+.`Ejemplo06-Pod/lanzar-ejemplo.sh`
+----
+include::Ejemplo06-Pod/lanzar-ejemplo.sh[]
+----
+
+image::crear-imagen-propia.png[]
+
+### Init containers
+
+[source,yaml, linenums]
+.`Ejemplo07-InitContainer/deployment-init-sg.yml`
+----
+include::Ejemplo07-InitContainer/deployment-init-sg.yml[]
+----
+
+[source,sh, linenums]
+.`Ejemplo07-InitContainer/lanzar-ejemplo.sh`
+----
+include::Ejemplo07-InitContainer/lanzar-ejemplo.sh[]
+----
+
+### Objetos de Kubernetes. Deployment​
+
+* Declaración de los pods de una aplicación (servicio)​
+    - Imagen de base​
+    - Puertos​
+    - Volúmenes​
+    - Número de réplicas​
+    - Recursos demandados (cpu, RAM)​
+    - Límites para autoescalado​
+    - ...​
+
+image::kubernetes-deployment.png[]
+
+#### Despliegue básico
+
+[source,yaml, linenums]
+.`Ejemplo08-Deployment-Basico/deployment-myweb.yml`
+----
+include::Ejemplo08-Deployment-Basico/deployment-myweb.yml[]
+----
+
+[source,bash, linenums]
+.`Ejemplo08-Deployment-Basico/lanzar-ejemplo.sh`
+----
+include::Ejemplo08-Deployment-Basico/lanzar-ejemplo.sh[]
+----
+
+#### Despliegue con base de datos, API y frontend
+
+[source,yaml, linenums]
+.`Ejemplo09-Deployment-SG/deployment-sgbd.yml`
+----
+include::Ejemplo09-Deployment-SG/deployment-sgbd.yml[]
+----
+
+[source,yaml, linenums]
+.`Ejemplo09-Deployment-SG/deployment-sgapi.yml`
+----
+include::Ejemplo09-Deployment-SG/deployment-sgapi.yml[]
+----
+
+[source,yaml, linenums]
+.`Ejemplo09-Deployment-SG/deployment-sgapp.yml`
+----
+include::Ejemplo09-Deployment-SG/deployment-sgapp.yml[]
+----
+
+[source,bash, linenums]
+.`Ejemplo09-Deployment-SG/lanzar-ejemplo.sh`
+----
+include::Ejemplo09-Deployment-SG/lanzar-ejemplo.sh[]
+----
+
+image::kubernetes-desplegar-deployment.png[]
+
+[IMPORTANT]
+====
+La aplicación no consigue extraer los datos de la API. Esto se debe a que no se han creado los servicios, que son los *objetos de Kubernetes que permiten el descubrimiento de pods*.
+====
+
+### Objetos de Kubernetes. Service​
+
+* Los servicios son una abstracción que definen un conjunto lógico de pods y una política de acceso a ellos estableciendo un nombre para acceder a ellos​
+* Cada pod tiene una dirección IP única, pero esa IP no se expone fuera del cluster sin lo que se denomina un Servicio​
+* Los servicios pemiten que las aplicaciones reciban tráfico​
+    - ClusterIP: Servicio con IP interna a nivel de cluster ​
+    - NodePort: Servicio expuesto fuera del cluster concatenando IP del nodo con puerto [30000-32767]​
+    - LoadBalancer: Ofrece una IP externa​
+    - ExternalName: Expone el servicio usando un nombre arbitrario
+* Enrutado de tráfico entre pods proporcionando una abstracción que permite que los pods mueran y se repliquen sin impactar en la aplicación. ​
+* Gestionan el descubrimiento y enrutado entre pods dependientes (p.e. frontend y backend)
+
+image::kubernetes-service.png[]
+
+### Despliegue de un Service​
+
+[source,yaml, linenums]
+.`Ejemplo10-Service/deployment-sgbd.yml`
+----
+include::Ejemplo10-Service/deployment-sgbd.yml[]
+----
+
+[source,yaml, linenums]
+.`Ejemplo10-Service/deployment-sgapi.yml`
+----
+include::Ejemplo10-Service/deployment-sgapi.yml[]
+----
+
+[source,yaml, linenums]
+.`Ejemplo10-Service/deployment-sgapp.yml`
+----
+include::Ejemplo10-Service/deployment-sgapp.yml[]
+----
+
+[source,yaml, linenums]
+.`Ejemplo10-Service/services.yml`
+----
+include::Ejemplo10-Service/services.yml[]
+----
+
+[source,bash, linenums]
+.`Ejemplo10-Service/lanzar-ejemplo.sh`
+----
+include::Ejemplo10-Service/lanzar-ejemplo.sh[]
+----
+
+### Objetos de Kubernetes. HorizontalPodAutoscaler​
+
+* Consulta cada 15s las métricas de uso (CPU, RAM, …) de cada pod​
+* Fija un mínimo y máximo de réplicas de un deployment​
+* Define las condiciones de stress (p.e. porcentaje de uso de la CPU)​
+* Ante stress escala hacia arriba​
+* 5m sin stress escala hacia abajo
+
+image::kubernetes-hpa.png[]
+
+.Weave Scope
+****
+Herramienta de Visualización y Monitorización de Docker y Kubernetes​
+
+[source,bash, linenums]
+.`Ejemplo11-Autoscaling/lanzar-weavescope.sh`
+----
+include::Ejemplo11-Autoscaling/lanzar-weavescope.sh[]
+----
+image::weavescope.png[]
+****
+
+### Autoescalado
+
+Nos basamos en los mismos archivos de despliegue de la API, Front y Service, pero añadimos el autoescalado (HPA)
+
+[source,yaml, linenums]
+.`Ejemplo11-Autoscaling/deployment-sgbd.yml`
+----
+include::Ejemplo11-Autoscaling/deployment-sgbd.yml[]
+----
+
+[source,yaml, linenums]
+.`Ejemplo11-Autoscaling/deployment-sgapi.yml`
+----
+include::Ejemplo11-Autoscaling/deployment-sgapi.yml[]
+----
+
+[source,yaml, linenums]
+.`Ejemplo11-Autoscaling/deployment-sgapp.yml`
+----
+include::Ejemplo11-Autoscaling/deployment-sgapp.yml[]
+----
+
+[source,yaml, linenums]
+.`Ejemplo11-Autoscaling/services.yml`
+----
+include::Ejemplo11-Autoscaling/services.yml[]
+----
+
+[source,yaml, linenums]
+.`Ejemplo11-Autoscaling/autoscaler.yml`
+----
+include::Ejemplo11-Autoscaling/autoscaler.yml[]
+----
+
+[source,sh, linenums]
+.`Ejemplo11-Autoscaling/lanzar-ejemplo-autoscaler.sh`
+----
+include::Ejemplo11-Autoscaling/lanzar-ejemplo-autoscaler.sh[]
+----
+
+### Prueba de stress con https://httpd.apache.org/docs/2.4/programs/ab.html[Apache Benchmark]
+
+* 10.000 peticiones totales​
+* 100 peticiones simultáneas​
+
+[source, bash]
+----
+$ ab -n 10000 -c 100 http://13.80.126.78/
+----
+
+image::autoescalado-weavescope-blue.png[]
+
+image::autoescalado-weavescope-red.png[]
+
+image::autoescalado-ab.png[]
+
+image::autoescalado-kubectl.png[]
+
+### Ciclo de desarrollo con Kubernetes​
+
+* Crear carpetas de desarrollo​
+* Crear docker-compose.yaml​
+* Lanzar docker-compose.yaml​
+* Crear Dockerfile​
+* Iterar:
+    - Programar + Subir a repo​
+    - Crear imagen propia​
+    - Etiquetar como nueva versión​
+    - Subir nueva imagen a Docker Hub​
+    - Poner en producción​
+

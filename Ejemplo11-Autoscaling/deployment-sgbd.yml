@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  namespace: demo
+spec:
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:5.7
+          env:
+            # Use secret in real usage
+            - name: MYSQL_ROOT_PASSWORD
+              value: secret
+          ports:
+            - containerPort: 3306
+              name: mysql
+          volumeMounts:
+            - name: workdir
+              mountPath: /docker-entrypoint-initdb.d
+      initContainers:
+        - name: install
+          image: busybox
+          command:
+            - wget
+            - "-O"
+            - "/work-dir/init.sql"
+            - https://gist.githubusercontent.com/ualmtorres/eb328b653fcc5964f976b22c320dc10f/raw/448b00c44d7102d66077a393dad555585862f923/init.sql
+          volumeMounts:
+            - name: workdir
+              mountPath: "/work-dir"
+      dnsPolicy: Default
+      volumes:
+        - name: workdir
+          emptyDir: {}

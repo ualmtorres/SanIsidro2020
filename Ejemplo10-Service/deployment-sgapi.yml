@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sgapi
+  namespace: demo
+  labels:
+    app: sgapi
+spec:
+  revisionHistoryLimit: 2
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: sgapi
+  template:
+    metadata:
+      labels:
+        app: sgapi
+    spec:
+      containers:
+        - name: sgapi
+          image: ualmtorres/sgapi:v0
+          ports:
+            - name: http
+              containerPort: 80
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
